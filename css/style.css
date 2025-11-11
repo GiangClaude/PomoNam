@@ -208,6 +208,25 @@ body {
   object-fit: contain;
 }
 
+.player-controls-skip, .player-controls-seek {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  z-index: 20;
+  position: absolute;
+}
+
+.player-controls-skip{
+    left: 14.8%;
+    margin-top: 113px;
+    flex-direction: column;
+}
+
+.player-controls-seek{
+  left: 67%;
+  margin-top: 24px;
+}
+
 /* --- Settings Modal --- (Giữ nguyên hoặc tùy chỉnh thêm) */
 .settings-modal {
   display: none;

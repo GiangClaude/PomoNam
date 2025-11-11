@@ -34,12 +34,60 @@ class YouTubePlaylist {
       this.setRandomMode(e.target.checked);
     });
 
+    // Player control buttons (prev/next/seek)
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const seekFwdBtn = document.getElementById('seek-forward-btn');
+    const seekBackBtn = document.getElementById('seek-back-btn');
+    if (prevBtn) prevBtn.addEventListener('click', () => this.prevVideo());
+    if (nextBtn) nextBtn.addEventListener('click', () => this.nextVideo());
+    if (seekFwdBtn) seekFwdBtn.addEventListener('click', () => this.seekBy(10));
+    if (seekBackBtn) seekBackBtn.addEventListener('click', () => this.seekBy(-10));
+
     // Load playlist URL đã lưu khi khởi tạo
     const initialSettings = window.pomoSettings || {}; // Lấy từ pomoSettings đã được settings.js load
     if (initialSettings.playlistUrl) {
       document.getElementById('playlist-url').value = initialSettings.playlistUrl;
       // Có thể tự động fetch playlist nếu muốn, nhưng hiện tại chỉ điền vào input
       // this.fetchPlaylist(); // Bỏ comment nếu muốn tự động load playlist khi tải trang
+    }
+  }
+
+  prevVideo() {
+    if (!this.playerReady || this.videoIds.length === 0) return;
+
+    if (this.isRandom) {
+      // If random mode, just pick another random index
+      let newIndex;
+      do {
+        newIndex = Math.floor(Math.random() * this.videoIds.length);
+      } while (newIndex === this.currentIndex && this.videoIds.length > 1);
+      this.currentIndex = newIndex;
+    } else {
+      this.currentIndex = (this.currentIndex - 1 + this.videoIds.length) % this.videoIds.length;
+    }
+
+    const id = this.videoIds[this.currentIndex]?.id;
+    if (id) {
+      this.player.loadVideoById(id);
+      this.currentSongTitleEl.textContent = this.videoIds[this.currentIndex].title;
+    }
+  }
+
+  /**
+   * Seek relative seconds in the current video. Positive to forward, negative to back.
+   */
+  seekBy(seconds) {
+    if (!this.playerReady || !this.player) return;
+    try {
+      const current = this.player.getCurrentTime();
+      const duration = this.player.getDuration() || 0;
+      let target = current + seconds;
+      if (target < 0) target = 0;
+      if (duration && target > duration) target = duration - 0.1;
+      this.player.seekTo(target, true);
+    } catch (e) {
+      console.warn('Seek failed', e);
     }
   }
 
@@ -255,3 +303,9 @@ window.ytPlayer = {
   play: () => ytPlaylist.play(),
   pause: () => ytPlaylist.pause()
 };
+
+// Expose navigation for UI / external controls
+window.ytPlayer.next = () => ytPlaylist.nextVideo();
+window.ytPlayer.prev = () => ytPlaylist.prevVideo && ytPlaylist.prevVideo();
+window.ytPlayer.seekForward = (sec = 10) => ytPlaylist.seekBy && ytPlaylist.seekBy(Math.abs(sec));
+window.ytPlayer.seekBackward = (sec = 10) => ytPlaylist.seekBy && ytPlaylist.seekBy(-Math.abs(sec));

@@ -2,11 +2,14 @@
 
 class YouTubePlaylist {
   constructor() {
-    // Đọc API key từ environment variable hoặc fallback (vì phát triển cục bộ)
-    // Trong production (Netlify/Vercel), set biến này trong dashboard
-    this.API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY || window.YOUTUBE_API_KEY || '';
+    // Read API key from Vite env (import.meta.env) when built with Vite,
+    // fall back to global window.YOUTUBE_API_KEY for non-built/test scenarios.
+    // Note: this file will be loaded as an ES module under Vite, so import.meta.env is available.
+    this.API_KEY = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_YOUTUBE_API_KEY)
+      ? import.meta.env.VITE_YOUTUBE_API_KEY
+      : (typeof window !== 'undefined' && window.YOUTUBE_API_KEY ? window.YOUTUBE_API_KEY : '');
     if (!this.API_KEY) {
-      console.warn('⚠️ YouTube API Key not found. Please set VITE_YOUTUBE_API_KEY in .env or window.YOUTUBE_API_KEY');
+      console.warn('⚠️ YouTube API Key not found. Set VITE_YOUTUBE_API_KEY in build env or window.YOUTUBE_API_KEY before loading.');
     }
     this.playlistId = '';
     this.videoIds = []; // Mảng chứa { id, title }

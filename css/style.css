@@ -19,7 +19,7 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('/FrameNoNameSong.png'); /* Đảm bảo đường dẫn đúng */
+  background-image: url('../public/img/FrameNoNameSong.png'); /* Đảm bảo đường dẫn đúng */
   background-size: 100% 100%; /* Kéo dãn ảnh nền để vừa khung */
   background-repeat: no-repeat;
   background-position: center center;
@@ -86,7 +86,7 @@ body {
     word-wrap: break-word;
     overflow: hidden;
     z-index: 60;
-    background-image: url(/TextFrame.png);
+    background-image: url(/public/img/TextFrame.png);
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center center;
@@ -135,7 +135,6 @@ body {
     /* background-color: #f7a977;  */
     /* border-radius: 15px; */
     /* padding: 10px 20px; */
-    margin-top: 10px;
     /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
     min-width: 150px;
     text-align: center;

@@ -18,7 +18,9 @@
     <div class="frame-overlay"></div>
 
     <div class="frame-gif">
-      <img src="./gifs/IMG_3844.GIF" alt="">
+      <!-- public/ is the Vite/static 'public' folder and is served at the site root.
+           Reference files there as /gifs/... not ./public/gifs/... -->
+      <img src="/gifs/IMG_3844.GIF" alt="">
     </div>
 
     <!-- CURRENT SONG DISPLAY - Nằm trên frame-overlay -->
@@ -88,10 +90,7 @@
     </div>
   </div>
 
-  <!-- YouTube API Scripts -->
-  <script src="js/gif-controller.js"></script>
-  <script src="js/pomodoro.js"></script>
-  <script src="js/youtube.js"></script>
-  <script src="js/settings.js"></script>
+  <!-- Module entry for Vite / modern bundlers -->
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>

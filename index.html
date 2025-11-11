@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PomoNam</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Player sẽ nằm dưới frame-overlay -->
+    <div class="video-player-container">
+      <div id="player"></div>
+    </div>
+
+    <!-- frame-overlay: lớp ảnh khung nằm trên video nhưng dưới các UI khác -->
+    <div class="frame-overlay"></div>
+
+    <div class="frame-gif">
+      <img src="./gifs/IMG_3844.GIF" alt="">
+    </div>
+
+    <!-- CURRENT SONG DISPLAY - Nằm trên frame-overlay -->
+
+    <div class="current-song-display">
+      <span id="current-song-title">Tên bài hát hiện tại</span>
+    </div>
+
+          <!-- TIMER DISPLAY -->
+    <div class="timer-display-wrapper">
+        <div id="timer-display">25:00</div>
+    </div>
+
+    <!-- Right Section - Nằm trên frame-overlay -->
+    <div class="right-section">
+      <!-- Settings gear (opens modal) -->
+      <button id="settings-btn" title="Settings" aria-label="Open settings">⚙️</button>
+
+      <!-- Control Buttons -->
+      <div class="main-controls">
+        <button id="start-btn">BẮT ĐẦU</button>
+        <button id="reset-btn">KẾT THÚC</button>
+      </div>
+    </div>
+
+          <!-- GIF -->
+    <div class="gif-section">
+        <div class="gif-container">
+          <img id="pomo-gif" src="" alt="Pomo Character" />
+        </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal - Giữ nguyên như trước, nó sẽ có z-index riêng rất cao -->
+  <div id="settings-modal" class="settings-modal" aria-hidden="true">
+    <div class="settings-overlay" data-close></div>
+    <div class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <h2 id="settings-title">Cài đặt</h2>
+      <div class="modal-content-wrapper">
+        <section class="settings-section time-settings">
+          <h3>Thời gian</h3>
+          <label>Thời gian tập trung (phút): <input type="number" id="modal-focus-min" min="1" /></label>
+          <label>Thời gian nghỉ (phút): <input type="number" id="modal-break-min" min="1" /></label>
+        </section>
+
+        <section class="settings-section video-settings">
+          <h3>Video / Playlist</h3>
+          <label>Link playlist: <input type="url" id="playlist-url" placeholder="Dán link YouTube playlist..." /></label>
+          <button id="fetch-btn">XÁC NHẬN</button>
+          <div id="playlist-status"></div>
+
+          <label><input type="checkbox" id="random-mode" /> Phát ngẫu nhiên</label>
+          <label><input type="checkbox" id="modal-repeat" /> Lặp lại bài hiện tại</label>
+          <label><input type="checkbox" id="modal-pause-on-break" /> Dừng video khi nghỉ</label>
+
+          <div class="video-list-modal-container">
+            <h4>Danh sách video</h4>
+            <div id="video-list" class="video-list"></div>
+          </div>
+        </section>
+      </div>
+
+      <div class="settings-actions">
+        <button id="settings-save">LƯU</button>
+        <button id="settings-cancel">HỦY</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- YouTube API Scripts -->
+  <script src="js/gif-controller.js"></script>
+  <script src="js/pomodoro.js"></script>
+  <script src="js/youtube.js"></script>
+  <script src="js/settings.js"></script>
+</body>
+</html>

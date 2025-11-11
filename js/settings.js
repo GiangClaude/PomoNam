@@ -10,7 +10,7 @@
       random: false,
       repeatCurrent: false,
       pauseOnBreak: true, // Thêm cài đặt này
-      playlistUrl: '' // Thêm cài đặt này để lưu link playlist
+      playlistUrl: 'https://www.youtube.com/watch?v=8d_-GCsWC1s&list=PLc9EiDwxHEDv50KBpo037SD9Fc0kxH0xV' // Thêm cài đặt này để lưu link playlist
     };
   }
 
@@ -98,6 +98,8 @@
     // Initialize: apply persisted settings to app
     const initial = loadSettings();
     applySettingsToApp(initial);
+  // Notify other modules that settings have been applied (useful for youtube.js to auto-load playlist)
+  try { document.dispatchEvent(new CustomEvent('pomonam:settingsApplied', { detail: initial })); } catch (e) { /* noop */ }
 
     if (btn) btn.addEventListener('click', openModal);
     if (overlay) overlay.addEventListener('click', closeModal);
@@ -114,6 +116,8 @@
       };
       saveSettings(s);
       applySettingsToApp(s); // Áp dụng cài đặt đã lưu
+      // Notify other modules the settings changed (e.g., new playlist URL)
+      try { document.dispatchEvent(new CustomEvent('pomonam:settingsApplied', { detail: s })); } catch (e) { /* noop */ }
       closeModal();
     });
 

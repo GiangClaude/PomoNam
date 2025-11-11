@@ -95,4 +95,6 @@ class PomoGIF {
   }
 }
 
+// Expose instance to global scope so non-module code (e.g., pomodoro.js) can access it.
 const pomoGIF = new PomoGIF();
+if (typeof window !== 'undefined') window.pomoGIF = pomoGIF;

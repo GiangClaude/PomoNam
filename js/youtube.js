@@ -37,19 +37,56 @@ class YouTubePlaylist {
     // Player control buttons (prev/next/seek)
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
-    const seekFwdBtn = document.getElementById('seek-forward-btn');
-    const seekBackBtn = document.getElementById('seek-back-btn');
     if (prevBtn) prevBtn.addEventListener('click', () => this.prevVideo());
     if (nextBtn) nextBtn.addEventListener('click', () => this.nextVideo());
-    if (seekFwdBtn) seekFwdBtn.addEventListener('click', () => this.seekBy(10));
-    if (seekBackBtn) seekBackBtn.addEventListener('click', () => this.seekBy(-10));
 
-    // Load playlist URL đã lưu khi khởi tạo
-    const initialSettings = window.pomoSettings || {}; // Lấy từ pomoSettings đã được settings.js load
-    if (initialSettings.playlistUrl) {
-      document.getElementById('playlist-url').value = initialSettings.playlistUrl;
-      // Có thể tự động fetch playlist nếu muốn, nhưng hiện tại chỉ điền vào input
-      // this.fetchPlaylist(); // Bỏ comment nếu muốn tự động load playlist khi tải trang
+    // Listen for settings applied event (settings.js will dispatch on load/save)
+    document.addEventListener('pomonam:settingsApplied', (e) => {
+      const s = (e && e.detail) ? e.detail : {};
+      if (s.playlistUrl) {
+        const input = document.getElementById('playlist-url');
+        if (input) input.value = s.playlistUrl;
+        // If no playlist loaded yet, auto-fetch the saved playlist on startup
+        if (!this.videoIds || this.videoIds.length === 0) {
+          // small timeout to let UI settle
+          setTimeout(() => this.fetchPlaylist(), 100);
+        }
+      }
+    });
+  }
+
+  /**
+   * Toggle between 1x and 2x playback speed. Updates button label.
+   */
+  async toggleDoubleSpeed(buttonEl) {
+    if (!this.playerReady || !this.player) return;
+    try {
+      const current = this.player.getPlaybackRate ? this.player.getPlaybackRate() : 1;
+      const target = (Math.abs(current - 2) < 0.1) ? 1 : 2;
+      // Some videos may not support 2x; check available rates
+      const avail = this.player.getAvailablePlaybackRates ? this.player.getAvailablePlaybackRates() : [];
+      if (avail && avail.length && !avail.includes(target)) {
+        // If 2 not available, try the highest available
+        const max = Math.max(...avail);
+        this.player.setPlaybackRate(max);
+        if (buttonEl) buttonEl.textContent = max + 'x';
+      } else {
+        this.player.setPlaybackRate(target);
+        if (buttonEl) buttonEl.textContent = target + 'x';
+      }
+    } catch (e) {
+      console.warn('Failed to toggle speed', e);
+    }
+  }
+
+  setPlaybackRate(rate) {
+    if (!this.playerReady || !this.player) return;
+    try {
+      this.player.setPlaybackRate(rate);
+      const btn = document.getElementById('speed-btn');
+      if (btn) btn.textContent = rate + 'x';
+    } catch (e) {
+      console.warn('Failed to set playback rate', e);
     }
   }
 
@@ -193,6 +230,17 @@ class YouTubePlaylist {
                 // Thử play video
                 try { event.target.playVideo(); } catch (e) { console.warn("Autoplay was prevented."); }
             }
+            // Update speed button label if present
+            try {
+              const speedBtn = document.getElementById('speed-btn');
+              if (speedBtn) {
+                const rate = event.target.getPlaybackRate ? event.target.getPlaybackRate() : 1;
+                speedBtn.textContent = (rate || 1) + 'x';
+                speedBtn.disabled = false;
+              }
+            } catch (e) {
+              /* ignore */
+            }
           },
           'onStateChange': (event) => {
             if (event.data === YT.PlayerState.ENDED) {
@@ -309,3 +357,5 @@ window.ytPlayer.next = () => ytPlaylist.nextVideo();
 window.ytPlayer.prev = () => ytPlaylist.prevVideo && ytPlaylist.prevVideo();
 window.ytPlayer.seekForward = (sec = 10) => ytPlaylist.seekBy && ytPlaylist.seekBy(Math.abs(sec));
 window.ytPlayer.seekBackward = (sec = 10) => ytPlaylist.seekBy && ytPlaylist.seekBy(-Math.abs(sec));
+window.ytPlayer.setSpeed = (rate) => ytPlaylist.setPlaybackRate ? ytPlaylist.setPlaybackRate(rate) : null;
+window.ytPlayer.toggle2x = () => ytPlaylist.toggleDoubleSpeed ? ytPlaylist.toggleDoubleSpeed(document.getElementById('speed-btn')) : null;

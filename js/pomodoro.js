@@ -1,4 +1,5 @@
 // js/pomodoro.js
+ // Giả sử gif-controller.js đã khởi tạo và gán vào window.pomoGIF
 
 class PomodoroTimer {
   constructor() {
@@ -21,6 +22,20 @@ class PomodoroTimer {
 
     this.loadSettings(); // Tải cài đặt ban đầu từ localStorage thông qua settings.js
     this.updateDisplay();
+
+    // Prepare break sound (play once when focus ends)
+    try {
+      this.breakSound = new Audio('/sounds/TimeBreak.mp3');
+      this.breakSound.preload = 'auto';
+      this.breakSound.loop = false;
+      this.breakSound.volume = 0.95;
+    } catch (e) {
+      console.warn('Could not create break sound audio:', e);
+      this.breakSound = null;
+    }
+
+    // Audio unlock flag
+    this.audioUnlocked = false;
   }
 
   loadSettings() {
@@ -46,6 +61,10 @@ class PomodoroTimer {
 
   start() {
     if (this.isRunning) return;
+    // Unlock audio on first user gesture (start button) to satisfy autoplay policies
+    if (!this.audioUnlocked) {
+      this._unlockAudio();
+    }
     this.isRunning = true;
     this.startBtn.textContent = 'TẠM DỪNG';
     this.resetBtn.textContent = 'KẾT THÚC'; // Đảm bảo nút này hiển thị đúng khi bắt đầu
@@ -60,6 +79,26 @@ class PomodoroTimer {
     }, 1000);
   }
 
+  _unlockAudio() {
+    this.audioUnlocked = true;
+    // Try to play and immediately pause the break sound to unlock audio on some browsers
+    if (this.breakSound) {
+      try {
+        const p = this.breakSound.play();
+        if (p && typeof p.then === 'function') {
+          p.then(() => {
+            try { this.breakSound.pause(); this.breakSound.currentTime = 0; } catch (e) { /* ignore */ }
+          }).catch(() => {
+            // play was blocked; we'll still mark unlocked to avoid retry storms
+          });
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    // If there are other audio elements (e.g., from gif-controller), we could try to unlock them here too.
+  }
+
   pause() {
     clearInterval(this.timerId);
     this.isRunning = false;
@@ -71,7 +110,7 @@ class PomodoroTimer {
     this.isBreak = false;
     this.loadSettings(); // Tải lại cài đặt
     this.updateDisplay();
-    pomoGIF.setBreakMode(false); // GIF về focus
+  if (window.pomoGIF) window.pomoGIF.setBreakMode(false); // GIF về focus
     this.startBtn.textContent = 'BẮT ĐẦU'; // Đặt lại text nút Start
     this.resetBtn.textContent = 'KẾT THÚC'; // Đặt lại text nút End
     if (window.ytPlayer) {
@@ -85,7 +124,7 @@ class PomodoroTimer {
     this.updateDisplay();
 
     // Gọi GIF
-    pomoGIF.setBreakMode(this.isBreak);
+  if (window.pomoGIF) window.pomoGIF.setBreakMode(this.isBreak);
 
     // Dừng/tiếp video, kiểm tra cài đặt từ settings.js
     if (window.ytPlayer && window.pomoSettings) {
@@ -93,6 +132,24 @@ class PomodoroTimer {
         window.ytPlayer.pause();
       } else {
         window.ytPlayer.play();
+      }
+    }
+
+    // If we've just switched into break (i.e., focus just ended), play the break sound once
+    if (this.isBreak && this.breakSound) {
+      try {
+        // reset and play
+        this.breakSound.pause();
+        this.breakSound.currentTime = 0;
+        const playPromise = this.breakSound.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(err => {
+            // Autoplay might be blocked if user never interacted; log and ignore
+            console.warn('Break sound play was blocked or failed:', err);
+          });
+        }
+      } catch (err) {
+        console.warn('Error when trying to play break sound:', err);
       }
     }
   }

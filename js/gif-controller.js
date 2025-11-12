@@ -9,24 +9,24 @@ class PomoGIF {
     this.gifConfig = {
       focus: {
         loop: [
-          { file: 'VietBai1.gif', weight: 80 },
-          { file: 'Ngu.gif',     weight: 15 },
-          { file: 'SiNghi.gif',  weight: 5 },
-          { file: 'QuayBut.gif',    weight: 5 },
+          { file: 'VietBai1.gif', weight: 50 },
+          { file: 'Ngu.gif',     weight: 20 },
+          { file: 'SiNghi.gif',  weight: 15 },
+          { file: 'QuayBut.gif',    weight: 15 },
         ],
         oneShot: [
-          { file: 'ChopMat.gif',    weight: 10 },
+          { file: 'ChopMat.gif',    weight: 30 },
         ]
       },
       break: {
         loop: [
           { file: 'BucBoi.gif',     weight: 50 },
           { file: 'ShareMuong.gif', weight: 30 },
-          { file: 'Ngu.gif',        weight: 20 },
-          { file: 'QuayBut.gif',    weight: 30 }
+          { file: 'Ngu.gif',        weight: 30 },
+          { file: 'QuayBut.gif',    weight: 20 }
         ],
         oneShot: [
-          { file: 'ChopMat.gif',    weight: 40 },
+          { file: 'ChopMat.gif',    weight: 30 },
         ]
       }
     };

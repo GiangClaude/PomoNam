@@ -55,7 +55,7 @@ class PomoGIF {
     const gifFile = this.getWeightedRandom(config.oneShot);
     const duration = this.getGIFDuration(gifFile);
 
-    this.gifElement.src = `/public/gifs/${gifFile}?t=${Date.now()}`;
+    this.gifElement.src = `/gifs/${gifFile}?t=${Date.now()}`;
 
     setTimeout(() => {
       this.isPlayingOneShot = false;
@@ -66,7 +66,7 @@ class PomoGIF {
   playLoop() {
     const config = this.isBreak ? this.gifConfig.break : this.gifConfig.focus;
     const gifFile = this.getWeightedRandom(config.loop);
-    this.gifElement.src = `/public/gifs/${gifFile}?t=${Date.now()}`;
+    this.gifElement.src = `/gifs/${gifFile}?t=${Date.now()}`;
   }
 
   getGIFDuration(filename) {

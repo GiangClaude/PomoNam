@@ -138,7 +138,7 @@ class YouTubePlaylist {
 
     this.showStatus('Đang lấy danh sách...', 'info');
     try {
-      console.log('THis API Key: ', this.API_KEY);
+      
         this.videoIds = await this.getPlaylistVideos(this.playlistId);
         if (this.videoIds.length === 0) return this.showStatus('Không tìm thấy video!', 'error');
 
@@ -167,7 +167,6 @@ class YouTubePlaylist {
     let nextPageToken = '';
 
     do {
-      console.log('API Key being used:', this.API_KEY);
 
       const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&pageToken=${nextPageToken}&key=${this.API_KEY}`;
       const response = await fetch(url);

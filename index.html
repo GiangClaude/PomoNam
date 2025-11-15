@@ -8,19 +8,25 @@
   <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
+  <div id="overlay"></div>
   <div class="container">
     <!-- Player sẽ nằm dưới frame-overlay -->
     <div class="video-player-container">
       <div id="player"></div>
+      <!-- Player navigation: prev/next and seek -->
+      <div class="player-controls-skip">
+          <button id="prev-btn" title="Bài trước">⏮️</button>
+          <button id="next-btn" title="Bài tiếp">⏭️</button>
+      </div>
+      <div class="frame-overlay"></div>
     </div>
 
     <!-- frame-overlay: lớp ảnh khung nằm trên video nhưng dưới các UI khác -->
-    <div class="frame-overlay"></div>
 
     <div class="frame-gif">
       <!-- public/ is the Vite/static 'public' folder and is served at the site root.
            Reference files there as /gifs/... not ./public/gifs/... -->
-      <img src="/gifs/IMG_3844.GIF" alt="">
+      <img src="/public/gifs/IMG_3844.GIF" alt="">
     </div>
 
     <!-- CURRENT SONG DISPLAY - Nằm trên frame-overlay -->
@@ -32,6 +38,7 @@
           <!-- TIMER DISPLAY -->
     <div class="timer-display-wrapper">
         <div id="timer-display">25:00</div>
+        <img src="/public/img/clockFrame.png" alt="">
     </div>
 
     <!-- Right Section - Nằm trên frame-overlay -->
@@ -41,16 +48,14 @@
 
       <!-- Control Buttons -->
       <div class="main-controls">
-        <button id="start-btn">BẮT ĐẦU</button>
-        <button id="reset-btn">KẾT THÚC</button>
+        <button class="start-btn btn-text">BẮT ĐẦU</button>
+        <button class="reset-btn btn-text">KẾT THÚC</button>
+        <button class="start-btn btn-no-text">🆗</button>
+        <button class="reset-btn btn-no-text">❎</button>
       </div>
     </div>
 
-          <!-- Player navigation: prev/next and seek -->
-    <div class="player-controls-skip">
-        <button id="prev-btn" title="Bài trước">⏮️</button>
-        <button id="next-btn" title="Bài tiếp">⏭️</button>
-    </div>
+
           <!-- GIF -->
     <div class="gif-section">
         <div class="gif-container">

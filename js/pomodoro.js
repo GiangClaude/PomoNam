@@ -5,8 +5,11 @@ class PomodoroTimer {
   constructor() {
     this.display = document.getElementById('timer-display');
     this.phaseLabel = document.getElementById('phase-label'); // Vẫn giữ reference nhưng sẽ không hiển thị
-    this.startBtn = document.getElementById('start-btn');
-    this.resetBtn = document.getElementById('reset-btn'); // Đổi thành nút "KẾT THÚC"
+    this.startBtn = document.getElementsByClassName('start-btn')[0];
+    this.resetBtn = document.getElementsByClassName('reset-btn')[0];
+    this.startBtn1 = document.getElementsByClassName('start-btn')[1];
+    this.resetBtn1 = document.getElementsByClassName('reset-btn')[1];
+    // Đổi thành nút "KẾT THÚC"
     // Các input này giờ nằm trong modal, sẽ được load qua settings.js
     // this.focusInput = document.getElementById('focus-min');
     // this.breakInput = document.getElementById('break-min');
@@ -19,6 +22,9 @@ class PomodoroTimer {
 
     this.startBtn.addEventListener('click', () => this.toggle());
     this.resetBtn.addEventListener('click', () => this.endSession()); // Đổi hành vi nút reset
+
+    this.startBtn1.addEventListener('click', () => this.toggle());
+    this.resetBtn1.addEventListener('click', () => this.endSession()); // Đổi hành vi nút reset
 
     this.loadSettings(); // Tải cài đặt ban đầu từ localStorage thông qua settings.js
     this.updateDisplay();
@@ -67,6 +73,7 @@ class PomodoroTimer {
     }
     this.isRunning = true;
     this.startBtn.textContent = 'TẠM DỪNG';
+    this.startBtn1.textContent = '⏹️';
     this.resetBtn.textContent = 'KẾT THÚC'; // Đảm bảo nút này hiển thị đúng khi bắt đầu
 
     this.timerId = setInterval(() => {
@@ -103,6 +110,7 @@ class PomodoroTimer {
     clearInterval(this.timerId);
     this.isRunning = false;
     this.startBtn.textContent = 'TIẾP TỤC';
+    this.startBtn1.textContent = '▶️';
   }
 
   endSession() { // Đổi tên từ reset thành endSession
@@ -112,6 +120,7 @@ class PomodoroTimer {
     this.updateDisplay();
   if (window.pomoGIF) window.pomoGIF.setBreakMode(false); // GIF về focus
     this.startBtn.textContent = 'BẮT ĐẦU'; // Đặt lại text nút Start
+    this.startBtn1.textContent = '🆗'
     this.resetBtn.textContent = 'KẾT THÚC'; // Đặt lại text nút End
     if (window.ytPlayer) {
       window.ytPlayer.pause(); // Dừng video khi kết thúc

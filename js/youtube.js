@@ -11,6 +11,7 @@ class YouTubePlaylist {
     if (!this.API_KEY) {
       console.warn('⚠️ YouTube API Key not found. Set VITE_YOUTUBE_API_KEY in build env or window.YOUTUBE_API_KEY before loading.');
     }
+
     this.playlistId = '';
     this.videoIds = []; // Mảng chứa { id, title }
     this.currentIndex = 0;
@@ -137,6 +138,7 @@ class YouTubePlaylist {
 
     this.showStatus('Đang lấy danh sách...', 'info');
     try {
+      console.log('THis API Key: ', this.API_KEY);
         this.videoIds = await this.getPlaylistVideos(this.playlistId);
         if (this.videoIds.length === 0) return this.showStatus('Không tìm thấy video!', 'error');
 
@@ -165,6 +167,8 @@ class YouTubePlaylist {
     let nextPageToken = '';
 
     do {
+      console.log('API Key being used:', this.API_KEY);
+
       const url = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&pageToken=${nextPageToken}&key=${this.API_KEY}`;
       const response = await fetch(url);
       const data = await response.json();

@@ -20,6 +20,7 @@ class YouTubePlaylist {
     this.statusEl = document.getElementById('playlist-status');
     this.videoListEl = document.getElementById('video-list'); // Trong modal
     this.playerReady = false;
+    this.hasStartedPlayback = false;
     this.currentSongTitleEl = document.getElementById('current-song-title'); // Thêm element hiển thị tên bài hát
 
     document.getElementById('fetch-btn').addEventListener('click', () => this.fetchPlaylist());
@@ -107,7 +108,7 @@ class YouTubePlaylist {
 
     const id = this.videoIds[this.currentIndex]?.id;
     if (id) {
-      this.player.loadVideoById(id);
+      this.loadSelectedVideo(id);
       this.currentSongTitleEl.textContent = this.videoIds[this.currentIndex].title;
     }
   }
@@ -116,7 +117,7 @@ class YouTubePlaylist {
    * Seek relative seconds in the current video. Positive to forward, negative to back.
    */
   seekBy(seconds) {
-    if (!this.playerReady || !this.player) return;
+    if (!this.playerReady || !this.player || !this.hasStartedPlayback) return;
     try {
       const current = this.player.getCurrentTime();
       const duration = this.player.getDuration() || 0;
@@ -143,14 +144,10 @@ class YouTubePlaylist {
         if (this.videoIds.length === 0) return this.showStatus('Không tìm thấy video!', 'error');
 
         this.showStatus(`Tải ${this.videoIds.length} video thành công!`, 'success');
+        this.currentIndex = 0;
+        this.hasStartedPlayback = false;
         this.renderVideoList();
         this.initPlayer(); // Khởi tạo player
-
-        // Play video đầu tiên nếu có
-        if (this.videoIds.length > 0) {
-            this.playVideoAt(0);
-        }
-
     } catch (error) {
         console.error('Lỗi khi lấy playlist:', error);
         this.showStatus(`Lỗi: ${error.message}`, 'error');
@@ -206,7 +203,7 @@ class YouTubePlaylist {
     if (this.player) {
       // Nếu player đã tồn tại, thay đổi video mà không tạo lại player
       if (this.videoIds.length > 0) {
-        this.player.loadVideoById(this.videoIds[0].id);
+        if (this.playerReady) this.player.cueVideoById(this.videoIds[0].id);
         this.currentSongTitleEl.textContent = this.videoIds[0].title;
       }
       return;
@@ -221,17 +218,18 @@ class YouTubePlaylist {
           'playsinline': 1,
           'enablejsapi': 1,
           'origin': window.location.origin,
-          'autoplay': 1, // Thử autoplay
-          'modestbranding': 1, // Loại bỏ logo YouTube
-          'controls': 0 // Ẩn điều khiển mặc định của YouTube
+          'autoplay': 0,
+          'controls': 1
         },
         events: {
           'onReady': (event) => {
             this.playerReady = true;
+            // Prepare the latest playlist without starting playback.
+            if (this.videoIds[this.currentIndex]) {
+              event.target.cueVideoById(this.videoIds[this.currentIndex].id);
+            }
             if (this.videoIds.length > 0) {
-                this.currentSongTitleEl.textContent = this.videoIds[0].title;
-                // Thử play video
-                try { event.target.playVideo(); } catch (e) { console.warn("Autoplay was prevented."); }
+                this.currentSongTitleEl.textContent = this.videoIds[this.currentIndex].title;
             }
             // Update speed button label if present
             try {
@@ -250,13 +248,14 @@ class YouTubePlaylist {
               if (window.ytSettings && window.ytSettings.repeatCurrent) {
                 const id = this.videoIds[this.currentIndex]?.id;
                 if (id) {
-                    this.player.loadVideoById(id); // Tải lại cùng video
+                    this.loadSelectedVideo(id); // Tải lại cùng video
                     this.currentSongTitleEl.textContent = this.videoIds[this.currentIndex].title;
                 }
                 return;
               }
               this.nextVideo();
             } else if (event.data === YT.PlayerState.PLAYING) {
+                this.hasStartedPlayback = true;
                 // Cập nhật tên bài hát khi video bắt đầu chơi
                 if (this.videoIds[this.currentIndex]) {
                     this.currentSongTitleEl.textContent = this.videoIds[this.currentIndex].title;
@@ -300,7 +299,7 @@ class YouTubePlaylist {
 
     if (index >= 0 && index < this.videoIds.length) {
       this.currentIndex = index;
-      this.player.loadVideoById(this.videoIds[index].id);
+      this.loadSelectedVideo(this.videoIds[index].id);
       this.currentSongTitleEl.textContent = this.videoIds[index].title; // Cập nhật tên bài hát
     } else {
         console.warn("Index ngoài phạm vi danh sách video.");
@@ -320,11 +319,22 @@ class YouTubePlaylist {
     } else {
       this.currentIndex = (this.currentIndex + 1) % this.videoIds.length;
     }
-    this.player.loadVideoById(this.videoIds[this.currentIndex].id);
+    this.loadSelectedVideo(this.videoIds[this.currentIndex].id);
     this.currentSongTitleEl.textContent = this.videoIds[this.currentIndex].title; // Cập nhật tên bài hát
   }
 
+  loadSelectedVideo(id) {
+    // Navigation only cues videos until the user starts the native player.
+    if (this.hasStartedPlayback) {
+      this.player.loadVideoById(id);
+    } else {
+      this.player.cueVideoById(id);
+    }
+  }
+
   play() {
+    // Timer controls may resume playback after the first native Play click.
+    if (!this.hasStartedPlayback) return;
     if (this.playerReady && this.player.getPlayerState() !== YT.PlayerState.PLAYING) {
       this.player.playVideo();
     }

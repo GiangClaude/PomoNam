@@ -409,6 +409,13 @@ position: absolute;
 
 .video-list button:hover { background: #f0f0f0; }
 
+.video-list button.is-current {
+  font-weight: 700;
+  background: #fff0e5;
+  border-color: #e09467;
+  box-shadow: inset 4px 0 #e09467;
+}
+
 
 .settings-actions {
   display: flex;

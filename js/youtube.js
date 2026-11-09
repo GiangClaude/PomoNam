@@ -21,6 +21,7 @@ class YouTubePlaylist {
     this.videoListEl = document.getElementById('video-list'); // Trong modal
     this.playerReady = false;
     this.hasStartedPlayback = false;
+    this.activeVideoId = null;
     this.currentSongTitleEl = document.getElementById('current-song-title'); // Thêm element hiển thị tên bài hát
 
     document.getElementById('fetch-btn').addEventListener('click', () => this.fetchPlaylist());
@@ -131,6 +132,7 @@ class YouTubePlaylist {
         this.showStatus(`Tải ${this.videoIds.length} video thành công!`, 'success');
         this.currentIndex = 0;
         this.hasStartedPlayback = false;
+        this.activeVideoId = null;
         this.renderVideoList();
         this.initPlayer(); // Khởi tạo player
     } catch (error) {
@@ -182,6 +184,19 @@ class YouTubePlaylist {
       btn.textContent = `${index + 1}. ${video.title}`;
       btn.onclick = () => this.playVideoAt(index);
       this.videoListEl.appendChild(btn);
+    });
+    this.updateActiveVideo(this.activeVideoId);
+  }
+
+  updateActiveVideo(videoId) {
+    this.activeVideoId = videoId || null;
+    // Match IDs because shuffle and unavailable videos can change player indexes.
+    const activeIndex = this.videoIds.findIndex(video => video.id === this.activeVideoId);
+    Array.from(this.videoListEl.children).forEach((button, index) => {
+      const active = index === activeIndex;
+      button.classList.toggle('is-current', active);
+      if (active) button.setAttribute('aria-current', 'true');
+      else button.removeAttribute('aria-current');
     });
   }
 
@@ -238,7 +253,9 @@ class YouTubePlaylist {
             if (event.data === YT.PlayerState.PLAYING) {
               this.hasStartedPlayback = true;
               this.currentIndex = this.player.getPlaylistIndex();
-              this.currentSongTitleEl.textContent = this.player.getVideoData().title || '';
+              const video = this.player.getVideoData();
+              this.currentSongTitleEl.textContent = video.title || '';
+              this.updateActiveVideo(video.video_id);
             }
             // YouTube handles normal playlist transitions without an extra next call.
             if (event.data === YT.PlayerState.ENDED && window.ytSettings?.repeatCurrent) {
@@ -274,6 +291,7 @@ class YouTubePlaylist {
   cuePlaylist(index = 0) {
     this.currentIndex = index;
     this.currentSongTitleEl.textContent = '';
+    this.updateActiveVideo(null);
     this.player.cuePlaylist({listType: 'playlist', list: this.playlistId, index});
     this.player.setLoop(true);
   }
